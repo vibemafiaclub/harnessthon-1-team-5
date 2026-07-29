@@ -50,6 +50,32 @@ return { switched: penpot.currentPage.name };
 
 `중간공유`·`최종제출`은 결과를 **옮겨 담는** 곳이다. 여기서 처음부터 저작하지 않는다.
 
+## 🔴 기존 파일은 같은 파일의 `기존파일` Page에 있다
+
+**하네스는 "지금 열려 있는 파일" 밖을 볼 수 없다.** Penpot Plugin API에는 파일을 여는
+수단이 없다 — `penpot.openFile` · `penpot.getFile` · `penpot.files` 전부 **undefined**다.
+
+그래서 과제의 기존 파일은 **별도 파일이 아니라 작업 파일 안의 `기존파일` Page**로 들어 있다.
+같은 파일이므로 자유롭게 읽을 수 있다.
+
+```js
+// 기존파일 Page의 화면들을 읽는다 (Page 전환 없이도 읽힌다)
+const src = penpot.currentFile.pages.find(p => p.name === "기존파일");
+const boards = src.root.children.filter(s => s.type === "board" || s.type === "frame");
+return boards.map(b => ({
+  name: b.name, w: b.width, h: b.height,
+  children: (b.children || []).length
+}));
+```
+
+- 전체 트리를 훑을 때는 `penpotUtils.findShapes(pred)` 를 쓴다 — 인자 없이 부르면
+  **파일의 모든 Page**를 순회한다(공식 유틸).
+- 읽기만 할 때는 `penpot.openPage()`로 전환하지 않아도 된다. **전환하면 남이 보는 화면도 바뀐다.**
+- ⚠️ **`기존파일` Page를 수정하지 않는다.** 읽기 대상이다. 정규화 결과는 **자기 Page**에 만든다.
+
+읽어야 할 것: 화면 목록·크기 / 반복되는 요소 / 색 계열 / 간격·타이포 값의 분포 / 네이밍 상태.
+**인벤토리 문서는 주어지지 않는다. 읽어서 파악하는 것이 과제의 일부다.**
+
 ## 절차
 1. **토큰 먼저**: 색/간격/타이포/라운드를 `figma.variables.createVariableCollection`+`createVariable`.
 2. **컴포넌트**: 반복요소를 `figma.createFrame()`(+autolayout) → `figma.createComponent(frame)`.
