@@ -11,6 +11,45 @@ PRD를 입력받아 **토큰 → 컴포넌트 → 화면** 순으로 저작한�
 - Figma-호환 MCP 실행 중(운영자 배포) + 브라우저 Penpot 플러그인 Connected + `claude mcp add --transport http penpot http://localhost:4401/mcp`.
 - 지원 `figma.*` 부분집합·미지원 목록: 이벤트 `figma-compat/README.md`. 미지원 호출은 명확한 에러로 안내됨 → 그때 `penpot.*`로 대체.
 
+## 🔴 STEP 0 — 작업할 Page를 먼저 확정한다 (건너뛰기 금지)
+
+**조 작업 파일에는 팀원 수 + 2개의 Page가 있다.** 각자 자기 이름 Page에서 작업하고,
+`중간공유`·`최종제출`은 공용이다. **엉뚱한 Page에 저작하면 남의 작업 위에 그린다.**
+Penpot은 실시간 협업이라 그 즉시 상대 화면에 반영되고, 되돌리기가 서로 꼬인다.
+
+> **작업할 Page 이름이 명확히 정해지지 않았다면 저작을 시작하지 않는다.**
+> Page 목록을 보여주고 사용자에게 "이 중 어디에 작업할까요?"를 물어본 뒤,
+> 답을 받고 나서만 진행한다. 추측해서 고르지 않는다. 기본값으로 첫 Page를 쓰지 않는다.
+
+```js
+// 현재 파일의 Page 목록과 현재 선택된 Page 확인
+return {
+  current: penpot.currentPage.name,
+  pages: penpot.currentFile.pages.map(p => p.name)
+};
+```
+
+확정된 뒤 그 Page로 전환하고, **전환됐는지 확인한 다음** 저작한다.
+
+```js
+const target = "홍길동";               // ← 사용자가 확정해준 이름
+const p = penpot.currentFile.pages.find(x => x.name === target);
+if (!p) return { error: "그런 Page 없음", pages: penpot.currentFile.pages.map(x => x.name) };
+penpot.openPage(p);
+return { switched: penpot.currentPage.name };
+```
+
+**이런 상황이면 반드시 되묻는다:**
+
+| 상황 | 행동 |
+|---|---|
+| 사용자가 Page를 말하지 않음 | 목록 보여주고 질문 → 답 대기 |
+| 지정한 이름이 목록에 없음 | 유사한 후보와 함께 되묻는다. 임의로 만들지 않는다 |
+| `중간공유`·`최종제출`에 쓰라고 지시받음 | 공용 Page임을 알리고 한 번 더 확인받는다 |
+| 하네스를 무인 실행 중 | Page 이름을 **인자로 받아야** 한다. 없으면 즉시 중단하고 요구한다 |
+
+`중간공유`·`최종제출`은 결과를 **옮겨 담는** 곳이다. 여기서 처음부터 저작하지 않는다.
+
 ## 절차
 1. **토큰 먼저**: 색/간격/타이포/라운드를 `figma.variables.createVariableCollection`+`createVariable`.
 2. **컴포넌트**: 반복요소를 `figma.createFrame()`(+autolayout) → `figma.createComponent(frame)`.
