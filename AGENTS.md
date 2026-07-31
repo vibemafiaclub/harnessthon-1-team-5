@@ -94,6 +94,18 @@ docs/
 | `layoutGrow` Spacer가 폭 1로 되돌아간다 | 하단 고정 요소는 Spacer 높이를 **계산해서 명시** |
 | hug(자동 폭) 칸은 텍스트를 갈아끼워도 위치가 안 따라온다 | 가변 텍스트 칸은 **고정 폭 + 텍스트 정렬** |
 | `primaryAxisSizingMode` 등 figma 사이징 프로퍼티가 안 먹는다 | `node.horizontalSizing = "fix"\|"auto"` (penpot 쪽)을 쓴다 |
+| **컴포넌트 이름이 파일 전역** — 옆 팀원 Page의 동명 컴포넌트가 잡힌다 | 이름 + **id 프리픽스**로 좁혀서 찾는다 |
+| 기존 파일 폰트가 **서버에 없으면 조용히 대체**된다 (에러 없음) | `penpot.fonts.all` 로 먼저 확인하고 대체 폰트를 정한다 |
+| 비-오토레이아웃 프레임은 `appendChild`가 자식을 **안 옮긴다** | 붙인 뒤 `c.x = parent.x + dx; c.y = parent.y + dy` |
+| 고정 폭 텍스트를 `growType="fixed"`로 두면 **글자가 잘린다** | `growType = "auto-height"` |
+| `export_shape`가 레이아웃 안정 전에 찍히면 **빈 영역**이 나온다 | 없다고 판단하기 전에 **재-export 한 번** |
+
+**쓸 수 있는 것도 알아두세요.**
+
+- **실제 사진을 넣을 수 있습니다.** top-level `await` 도 됩니다.
+  `const img = await penpot.uploadMediaUrl(name, url)` → `rect.fills = [{ fillOpacity:1, fillImage: img }]`
+- `board.insertChild(index, node)` 로 자식 순서를 고칠 수 있습니다.
+  (지우기가 위험한 환경이라 이게 탈출구입니다.)
 
 **저작 → `export_shape`로 PNG 확인 → 수정** 루프를 매 단계 돌리세요.
 안 보고 쌓으면 마지막에 전부 어긋나 있습니다.
