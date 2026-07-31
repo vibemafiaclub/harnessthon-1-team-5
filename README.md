@@ -49,6 +49,25 @@ MCP 등록은 `.mcp.json`에 이미 들어 있어 따로 할 것이 없습니다
 
 막히면 `participant-onboarding.md`의 트러블슈팅을 보세요.
 
+## 예시 PRD
+
+개발용 예시 PRD 2종이 [`docs/examples/`](./docs/examples/)에 들어 있습니다.
+
+```bash
+cp docs/examples/daangn-stock.md docs/PRD.md    # 당근마켓 → 증권
+cp docs/examples/airbnb-dating.md docs/PRD.md   # Airbnb → 소개팅
+```
+
+**둘 다 돌려보세요.** 하나에서만 돌아가는 하네스는 심사용(미공개) PRD에서 무너집니다.
+
+## 단계가 확정되면 (조장)
+
+```
+/scaffold-harness 우리 조 단계 이거야: ①... ②... ③...
+```
+
+`start`의 실행 순서와 `.claude/agents/stage-*.md` 초안이 한 번에 생성됩니다.
+
 ## 작업 저장
 
 ```
