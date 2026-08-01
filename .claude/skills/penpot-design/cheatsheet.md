@@ -169,6 +169,49 @@ evaluator는 이걸로 **결정론 채점**을 한다. 미학 판정을 LLM에�
 | 시각 확인 | `export_shape` 툴로 이미지를 뽑아 **직접 볼 수 있다** |
 | CSS 추출 | `penpot.generateStyle(shapes,{type:'css',withChildren:true})` — 토큰 밖 매직넘버 탐지용 |
 
+## 🔴🔴 운영 리허설 함정 16종 — 모르면 시간을 통째로 날린다
+
+> 출처: 운영이 예시 PRD(`docs/examples/`)로 직접 리허설하며 부딪힌 것들. `AGENTS.md`에도 있다.
+> **저작 코드를 쓰기 전에 이 표를 먼저 읽는다.** 대부분 "에러 없이 조용히 틀리는" 종류다.
+
+| 함정 | 대응 |
+|---|---|
+| `figma.variables.*` 는 성공 응답만 오고 토큰이 거의 안 남는다 | 토큰은 **JS 상수 객체**로 두고 저작에 일관 적용. 점수는 컴포넌트로 받는다 |
+| `fills`에 **figma 형식**(`{type:"SOLID", color:{r,g,b}}`)을 쓰면 인스턴스에서 막힌다 | **penpot 형식** `{fillColor:"#RRGGBB", fillOpacity:1}` → **인스턴스도 오버라이드된다** |
+| 인스턴스의 `characters`(텍스트) 오버라이드는 **된다** | 데이터가 다른 행은 인스턴스 재사용으로 처리 |
+| 반투명 오버레이(`fillOpacity: 0.4`)가 **렌더링에서 사라질 때가 있다** | 스크림을 덮지 말고 **뒤 화면 보드의 `opacity`를 낮춘다** |
+| `penpot.openPage()` 가 **다음 호출까지 유지되지 않는다** | 모든 스크립트 **첫 줄**에서 작업 Page를 다시 고정한다 |
+| `openPage()` 한 **그 호출 안에서** 새 Page 노드를 만지면 죽는다 | Page 전환은 **별도 호출**로 먼저, 다음 호출부터 저작 |
+| hHug 프레임 안 텍스트가 **아래가 잘린 채** 굳는다 | 화면 완성 후 `growType==="auto-height"` 텍스트를 전부 `resize`로 재계산 |
+| 만든 컴포넌트의 **이름 변경·자식 remove** → 플러그인이 멈춘다 | 이름·구조는 처음에 확정. 틀렸으면 **새 이름으로 새로** 만든다 |
+| `layoutGrow` Spacer가 폭 1로 되돌아간다 | 하단 고정 요소는 Spacer 높이를 **계산해서 명시** |
+| hug(자동 폭) 칸은 텍스트를 갈아끼워도 위치가 안 따라온다 | 가변 텍스트 칸은 **고정 폭 + 텍스트 정렬** |
+| `primaryAxisSizingMode` 등 figma 사이징 프로퍼티가 안 먹는다 | `node.horizontalSizing = "fix"\|"auto"` (penpot 쪽)을 쓴다 |
+| **컴포넌트 이름이 파일 전역** — 옆 팀원 Page의 동명 컴포넌트가 잡힌다 | 이름 + **id 프리픽스**로 좁혀서 찾는다 |
+| 기존 파일 폰트가 **서버에 없으면 조용히 대체**된다 (에러 없음) | `penpot.fonts.all`로 먼저 확인하고 대체 폰트를 정한다 |
+| 비-오토레이아웃 프레임은 `appendChild`가 자식을 **안 옮긴다** | 붙인 뒤 `c.x = parent.x + dx; c.y = parent.y + dy` |
+| 고정 폭 텍스트를 `growType="fixed"`로 두면 **글자가 잘린다** | `growType = "auto-height"` |
+| `export_shape`가 레이아웃 안정 전에 찍히면 **빈 영역**이 나온다 | 없다고 판단하기 전에 **재-export 한 번** |
+
+### ✅ 쓸 수 있는 것 — 모르면 손해다
+
+```js
+// 1) 실제 사진을 넣을 수 있다. top-level await 도 된다.
+const img = await penpot.uploadMediaUrl(name, url);
+rect.fills = [{ fillOpacity: 1, fillImage: img }];
+
+// 2) 자식 순서를 고칠 수 있다. (지우기가 위험한 환경이라 이게 탈출구)
+board.insertChild(index, node);
+
+// 3) shape.clone() 이 된다.
+//    같은 화면의 상태 변형(모달·에러·로딩)을 처음부터 다시 짓지 말 것.
+//    복제 → 덮을 것만 얹는다.
+const variant = screen.clone();
+```
+
+> `clone()`과 `uploadMediaUrl`은 **A트랙 "완성도·디테일"에 직결**된다.
+> 상태 변형을 매번 새로 짓거나 사진 자리를 회색 박스로 두면 그만큼 깎인다.
+
 ## 컴포넌트 / 라이브러리
 ```js
 const comp = penpot.library.local.createComponent([board]); // 보드를 컴포넌트화

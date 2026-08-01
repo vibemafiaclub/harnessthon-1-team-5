@@ -34,10 +34,14 @@ npx -y @matfia/pigma-mcp
 
 **2. 중앙 Penpot 접속 → 로그인 → 팀 `5조`의 `작업` 파일 열기**
 
-- https://penpot.tail45121d.ts.net
+- https://penpot.tail45121d.ts.net ⚠️ (운영 문서는 `sumin-macmini.tail45121d.ts.net` — 아래 참고)
 - 아이디 = 신청 시 적은 이메일 / 비밀번호 = **이메일 앞부분 + `123`** (예: `hong@gmail.com` → `hong123`)
 - 새 파일을 만들지 **마세요.** 팀 목록에서 **`5조`** → 파일 **`작업`** 을 엽니다
-- 확인 신호: Page 목록에 `1-daangn`·`2-airbnb`와 **내 이름 Page**가 보인다
+- 확인 신호: Page 목록에 **기존 디자인 Page**(`1-daangn`·`2-airbnb`)와 **내 이름 Page**가 보인다
+
+> ⚠️ **주소·Page 이름이 운영 문서와 어긋나 있고 아직 실측 확인이 안 됐습니다.**
+> 한쪽이 안 열리면 다른 쪽을 시도하고, 확인되는 대로 이 문서와 `AGENTS.md`를 고쳐 주세요.
+> 자세한 내용은 [`AGENTS.md`](./AGENTS.md)의 Penpot 절을 보세요.
 
 **3. 브라우저에서 플러그인 설치·연결**
 
@@ -62,6 +66,43 @@ MCP 등록은 `.mcp.json`에 이미 들어 있어 따로 할 것이 없습니다
 | `corepack: command not found` | `npm i -g pnpm` |
 | 빌드스크립트 차단 | `.npmrc`에 `dangerously-allow-all-builds=true` |
 | `localhost:9001`이 안 열림 | 그 주소가 아닙니다. 공개 URL(`ts.net`)로 접속하세요 |
+
+## 예시 PRD
+
+개발용 예시 PRD 2종이 [`docs/examples/`](./docs/examples/)에 들어 있습니다.
+
+```bash
+cp docs/examples/daangn-stock.md docs/PRD.md    # 당근마켓 → 증권
+cp docs/examples/airbnb-dating.md docs/PRD.md   # Airbnb → 소개팅
+```
+
+**둘 다 돌려보세요.** 하나에서만 돌아가는 하네스는 심사용(미공개) PRD에서 무너집니다.
+
+## 단계가 확정되면 (조장)
+
+```
+/scaffold-harness 우리 조 단계 이거야: ①... ②... ③...
+```
+
+`start`의 실행 순서와 `.claude/agents/stage-*.md` 초안이 한 번에 생성됩니다.
+
+## 프로젝트 문서 구조
+
+```
+context/       ← 프로젝트 배경, 타겟 유저, 목표
+policy/        ← 기능/스토리 단위 디자인 정책 (당근, airbnb, 최종)
+design/        ← 디자인 시스템 (토큰, 컴포넌트, 아이콘, 보이스, 레이아웃)
+decision/      ← 의사결정 로그
+develop/       ← 개발 산출물
+```
+
+| 디렉토리 | 핵심 산출물 |
+|---|---|
+| [`context/`](./context/) | strategy, user, stakeholder, product, architecture(mermaid), workflow |
+| [`policy/`](./policy/) | 기능 단위 정책 — 당근/airbnb/최종 PRD별 |
+| [`design/`](./design/) | token, component, iconography, voice, layout (각 300줄 이내) |
+| [`decision/`](./decision/) | 의사결정 근거 로그 (선택적) |
+| [`develop/`](./develop/) | 스크립트, 로그, 생성 산출물 |
 
 ## 작업 저장
 
