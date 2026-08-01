@@ -75,16 +75,24 @@ context/       ← 프로젝트 배경, 타겟 유저, 목표
 policy/        ← 기능/스토리 단위 디자인 정책 (당근, airbnb, 최종)
 design/        ← 디자인 시스템 (토큰, 컴포넌트, 아이콘, 보이스, 레이아웃)
 decision/      ← 의사결정 로그
-develop/       ← 개발 산출물
+develop/       ← 저작 스크립트·로그
+docs/artifacts/ ← 단계 간 중간 산출물 (하네스가 실행 중에 쓴다)
 ```
 
 | 디렉토리 | 핵심 산출물 |
 |---|---|
 | [`context/`](./context/) | strategy, user, stakeholder, product, architecture(mermaid), workflow |
 | [`policy/`](./policy/) | 기능 단위 정책 — 당근/airbnb/최종 PRD별 |
-| [`design/`](./design/) | token, component, iconography, voice, layout (각 300줄 이내) |
+| [`design/`](./design/) | `_base/`(절차) + PRD별 token, component, iconography, voice, layout |
 | [`decision/`](./decision/) | 의사결정 근거 로그 (선택적) |
-| [`develop/`](./develop/) | 스크립트, 로그, 생성 산출물 |
+| [`develop/`](./develop/) | 재사용 저작 스크립트, 실행 로그 |
+| [`docs/artifacts/`](./docs/artifacts/) | **단계 간 중간 산출물 — 여기가 유일한 경로** |
+
+두 가지만 기억하면 됩니다.
+
+- **다음 단계가 읽으면 `docs/artifacts/`, 사람이 다시 쓰면 나머지 폴더.**
+- **`design/_base/`에는 값을 적지 않습니다.** 당근 색·당근 문구를 상수로 박으면
+  미공개 심사 PRD에서 그대로 무너집니다. `_base/`는 절차, 값은 `design/{prd-slug}/`.
 
 ## 작업 저장
 
