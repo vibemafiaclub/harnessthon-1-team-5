@@ -68,6 +68,24 @@ cp docs/examples/airbnb-dating.md docs/PRD.md   # Airbnb → 소개팅
 
 `start`의 실행 순서와 `.claude/agents/stage-*.md` 초안이 한 번에 생성됩니다.
 
+## 프로젝트 문서 구조
+
+```
+context/       ← 프로젝트 배경, 타겟 유저, 목표
+policy/        ← 기능/스토리 단위 디자인 정책 (당근, airbnb, 최종)
+design/        ← 디자인 시스템 (토큰, 컴포넌트, 아이콘, 보이스, 레이아웃)
+decision/      ← 의사결정 로그
+develop/       ← 개발 산출물
+```
+
+| 디렉토리 | 핵심 산출물 |
+|---|---|
+| [`context/`](./context/) | strategy, user, stakeholder, product, architecture(mermaid), workflow |
+| [`policy/`](./policy/) | 기능 단위 정책 — 당근/airbnb/최종 PRD별 |
+| [`design/`](./design/) | token, component, iconography, voice, layout (각 300줄 이내) |
+| [`decision/`](./decision/) | 의사결정 근거 로그 (선택적) |
+| [`develop/`](./develop/) | 스크립트, 로그, 생성 산출물 |
+
 ## 작업 저장
 
 ```
