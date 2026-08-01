@@ -1,0 +1,11 @@
+[
+  {
+    "_comment": "이 항목은 형식 예시다. 실제 에셋을 반입하면 이 아래에 추가하고, 이 예시 항목은 지운다.",
+    "file": "brand-logos/example.svg",
+    "company": "가상 브랜드명",
+    "source_url": "https://example.com/press-kit",
+    "fetched_at": "2026-08-01",
+    "license": "공식 프레스킷 / 라이선스 명시 필요",
+    "usage_note": "원본 컬러 유지. 단색화 금지."
+  }
+]

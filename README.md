@@ -92,7 +92,7 @@ docs/artifacts/ ← 단계 간 중간 산출물 (하네스가 실행 중에 쓴�
 
 - **다음 단계가 읽으면 `docs/artifacts/`, 사람이 다시 쓰면 나머지 폴더.**
 - **`design/_base/`에는 값을 적지 않습니다.** 당근 색·당근 문구를 상수로 박으면
-  미공개 심사 PRD에서 그대로 무너집니다. `_base/`는 절차, 값은 `design/{prd-slug}/`.
+  미공개 심사 PRD에서 그대로 무너집니다. `_base/`는 절차, 값은 `docs/artifacts/03-design.md`.
 
 ## 작업 저장
 

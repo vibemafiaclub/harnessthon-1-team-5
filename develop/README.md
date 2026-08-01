@@ -22,8 +22,17 @@
 ```
 develop/
 ├── scripts/       ← Penpot 저작 스크립트·헬퍼 (여러 실행에 재사용)
+├── assets/        ← 반입한 로고·사진·일러스트 + 출처 기록
+│   ├── _sources.json   ← 출처·취득일·라이선스. 기록 없는 에셋은 화면에 넣지 않는다
+│   ├── _prompts.md     ← 외부 생성 일러스트의 프롬프트 원문 (재생성용)
+│   ├── brand-logos/
+│   ├── illust-3d/
+│   └── icons-ui/
 └── logs/          ← 실행 로그
 ```
+
+`_sources.json`과 `_prompts.md`는 **필수 산출물**이다.
+재작업·검수 때 이게 없으면 처음부터 다시 만들어야 한다.
 
 ## scripts/ 에 둘 것
 

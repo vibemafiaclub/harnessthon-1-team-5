@@ -13,7 +13,9 @@ description: 화면 목록을 받아 화면별 저작 정책을 만든다. 골�
 ## 입력 (이것만 읽는다)
 - `docs/PRD.md`
 - `docs/artifacts/01-screens.md`
-- `design/_base/color.md` (예산 규칙 확인용)
+- `design/_base/token.md` (컬러 예산 규칙 확인용)
+- `design/_base/layout.md` (골격 상수 산출 규칙)
+- `docs/artifacts/03-design.md` §보이스 (있으면. 문구 어미 규칙)
 
 ## 출력 (이것만 쓴다)
 - `docs/artifacts/02-policy.md`
@@ -88,7 +90,7 @@ description: 화면 목록을 받아 화면별 저작 정책을 만든다. 골�
 **문구 원칙**
 - 사과("죄송합니다")로 시작하지 않는다. **다음 행동**을 제시한다.
 - "{대상}이 없어요" + "{다음 행동}해 보세요" 패턴을 기본으로 한다.
-- 어미·존댓말은 `design/{prd-slug}/voice.md`를 따른다. 없으면 PRD 문장의 어미를 따른다.
+- 어미·존댓말은 `docs/artifacts/03-design.md` §보이스를 따른다. 없으면 PRD 문장의 어미를 따른다.
 - 버튼은 **1개만.** 빈 상태에서 선택지를 늘리지 않는다.
 
 ## 출력 형식
