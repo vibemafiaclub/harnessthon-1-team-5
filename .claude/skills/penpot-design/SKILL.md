@@ -8,13 +8,16 @@ description: PRD로부터 디자인 토큰·컴포넌트 라이브러리와 화�
 PRD를 입력받아 **토큰 → 컴포넌트 → 화면** 순으로 저작한다. `use_figma` MCP 툴로 코드를 실행하며, 코드 안에서 **`figma.*`(Figma Plugin API)**를 쓴다. (엔진은 Penpot이지만 인터페이스는 Figma로 통일. `penpot.*`도 병행 가능.)
 
 ## 사전조건
-- Figma-호환 MCP 실행 중(운영자 배포) + 브라우저 Penpot 플러그인 Connected + `claude mcp add --transport http penpot http://localhost:4401/mcp`.
+- 로컬 MCP 실행 중(`npx -y @matfia/pigma-mcp` → `:4400` `:4401`) + **브라우저 Penpot 플러그인 ● Connected**.
+- MCP 등록은 `.mcp.json`에 이미 있다. 안 잡히면 `claude mcp add --transport http penpot http://localhost:4401/mcp` 후 세션 재시작.
+- ⚠️ **연결 확인법**: `use_figma`로 `return 1+1;`. 30초 타임아웃이면 **플러그인이 연결 안 된 것**이다(코드 문제 아님).
 - 지원 `figma.*` 부분집합·미지원 목록: 이벤트 `figma-compat/README.md`. 미지원 호출은 명확한 에러로 안내됨 → 그때 `penpot.*`로 대체.
 
 ## 🔴 STEP 0 — 작업할 Page를 먼저 확정한다 (건너뛰기 금지)
 
-**조 작업 파일에는 팀원 수 + 2개의 Page가 있다.** 각자 자기 이름 Page에서 작업하고,
-`중간공유`·`최종제출`은 공용이다. **엉뚱한 Page에 저작하면 남의 작업 위에 그린다.**
+**조 작업 파일에는 `1-daangn`·`2-airbnb`(읽기 전용) + 팀원 이름 + `중간공유` + `최종제출`이 있다.**
+각자 자기 이름 Page에서 작업하고, `중간공유`·`최종제출`은 공용이다.
+**엉뚱한 Page에 저작하면 남의 작업 위에 그린다.**
 Penpot은 실시간 협업이라 그 즉시 상대 화면에 반영되고, 되돌리기가 서로 꼬인다.
 
 > **작업할 Page 이름이 명확히 정해지지 않았다면 저작을 시작하지 않는다.**
@@ -50,28 +53,35 @@ return { switched: penpot.currentPage.name };
 
 `중간공유`·`최종제출`은 결과를 **옮겨 담는** 곳이다. 여기서 처음부터 저작하지 않는다.
 
-## 🔴 기존 파일은 같은 파일의 `기존파일` Page에 있다
+## 🔴 기존 파일은 같은 파일의 `1-daangn`·`2-airbnb` Page에 있다
 
 **하네스는 "지금 열려 있는 파일" 밖을 볼 수 없다.** Penpot Plugin API에는 파일을 여는
 수단이 없다 — `penpot.openFile` · `penpot.getFile` · `penpot.files` 전부 **undefined**다.
 
-그래서 과제의 기존 파일은 **별도 파일이 아니라 작업 파일 안의 `기존파일` Page**로 들어 있다.
-같은 파일이므로 자유롭게 읽을 수 있다.
+그래서 과제의 기존 디자인은 **별도 파일이 아니라 작업 파일 안의 두 Page**로 들어 있다:
+**`1-daangn`** 과 **`2-airbnb`**. 같은 파일이므로 자유롭게 읽을 수 있다.
 
 ```js
-// 기존파일 Page의 화면들을 읽는다 (Page 전환 없이도 읽힌다)
-const src = penpot.currentFile.pages.find(p => p.name === "기존파일");
-const boards = src.root.children.filter(s => s.type === "board" || s.type === "frame");
-return boards.map(b => ({
-  name: b.name, w: b.width, h: b.height,
-  children: (b.children || []).length
-}));
+// 두 기존 Page의 화면들을 읽는다 (Page 전환 없이도 읽힌다)
+const SOURCES = ["1-daangn", "2-airbnb"];
+return SOURCES.map(name => {
+  const page = penpotUtils.getPageByName(name);          // 공식 유틸 — find()보다 안전
+  if (!page) return { page: name, error: "그런 Page 없음" };
+  const boards = page.root.children.filter(s => s.type === "board" || s.type === "frame");
+  return {
+    page: name,
+    boards: boards.map(b => ({ name: b.name, w: b.width, h: b.height, kids: (b.children||[]).length }))
+  };
+});
 ```
 
-- 전체 트리를 훑을 때는 `penpotUtils.findShapes(pred)` 를 쓴다 — 인자 없이 부르면
+- **먼저 `penpotUtils.getPages()`로 실제 Page 이름을 확인하라.** 위 이름이 다를 수 있다.
+  없으면 추측해서 만들지 말고 목록을 보여주고 되물어라.
+- 전체 트리를 훑을 때는 `penpotUtils.findShapes(pred)` — 인자 없이 부르면
   **파일의 모든 Page**를 순회한다(공식 유틸).
-- 읽기만 할 때는 `penpot.openPage()`로 전환하지 않아도 된다. **전환하면 남이 보는 화면도 바뀐다.**
-- ⚠️ **`기존파일` Page를 수정하지 않는다.** 읽기 대상이다. 정규화 결과는 **자기 Page**에 만든다.
+- 읽기만 할 때는 `penpot.openPage()`로 전환하지 **않는다.** **전환하면 남이 보는 화면도 바뀐다.**
+- ⚠️ **두 Page를 수정하지 않는다.** 읽기 전용이다. 정규화 결과는 **자기 Page**에 만든다.
+- ⚠️ `use_figma`는 **30초 타임아웃**이다. 두 Page를 한 번에 다 훑지 말고 Page별로 쪼개 실행하라.
 
 읽어야 할 것: 화면 목록·크기 / 반복되는 요소 / 색 계열 / 간격·타이포 값의 분포 / 네이밍 상태.
 **인벤토리 문서는 주어지지 않는다. 읽어서 파악하는 것이 과제의 일부다.**
@@ -80,7 +90,12 @@ return boards.map(b => ({
 1. **토큰 먼저**: 색/간격/타이포/라운드를 `figma.variables.createVariableCollection`+`createVariable`.
 2. **컴포넌트**: 반복요소를 `figma.createFrame()`(+autolayout) → `figma.createComponent(frame)`.
 3. **화면 조립**: 컴포넌트 인스턴스를 autolayout 프레임에 배치, 위계·네이밍 정리.
-4. **자기점검**: 위계/토큰/컴포넌트 조회로 검증(`penpot.*` 읽기 병행 가능).
+4. **종료**: 산출물 경로를 남기고 끝낸다. **자기 결과를 스스로 판정하지 않는다.**
+
+> ⚠️ **자기점검은 이 skill에서 제거됐다.** 만든 agent가 자기 것을 평가하면 칭찬만 한다는 것이
+> 실증됐다 — *"When asked to evaluate work they've produced, agents tend to respond by confidently
+> praising the work"* (Anthropic, *Harness Design for Long-Running Application Development*, 2026-03-24).
+> 검증은 **`stage-evaluate`가 별도 sub agent로** 수행한다.
 
 ## 채점 축 (최적화 목표) — 2트랙
 

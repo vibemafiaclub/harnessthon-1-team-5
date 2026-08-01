@@ -67,15 +67,107 @@ const t = penpot.createText('Title'); t.name='Card/Title'; b.appendChild(t);
 - 중첩: board 안에 board를 appendChild 하고 각자 addFlexLayout.
 
 ## 디자인 토큰
+
+### 🔴 침묵 실패 3종 — 모르면 "만들었는데 아무 일도 안 일어난다"
+
+| # | 함정 | 대응 |
+|---|---|---|
+| 1 | **비활성 set의 토큰은 적용되지 않는다** ("Only active sets affect shapes") | `addSet` 직후 **무조건** `if (!set.active) set.toggleActive();` |
+| 2 | **토큰 적용은 비동기다** ("Application is asynchronous") | 적용 후 **~100ms 대기** 뒤에 검증. 안 하면 자기검증이 거짓 실패 |
+| 3 | **`Group`에는 토큰을 적용할 수 없다** ("not to groups") | 반복요소는 `Group`이 아니라 **`Board`** 로 만든다 |
+
 ```js
-const cat = penpot.library.local.tokens;          // TokenCatalog
-const set = cat.addSet({name:'core'});            // TokenSet
-set.addToken({type:'color',   name:'color.primary', value:'#4f46e5'});
-set.addToken({type:'spacing', name:'space.md',      value:'12'});
-// 테마: cat.addTheme({group:'mode', name:'light'})
+const cat = penpot.library.local.tokens;              // TokenCatalog
+const set = cat.addSet({name:'core'});                // TokenSet
+if (!set.active) set.toggleActive();                  // ★함정1
+
+set.addToken({type:'color',  name:'color.primary', value:'#4F46E5'});  // hex는 대문자
+set.addToken({type:'number', name:'space.base',    value:'8'});
+set.addToken({type:'spacing',name:'space.md',      value:'{space.base} * 2'});  // ★수식
+set.addToken({type:'color',  name:'color.accent',  value:'{color.primary}'});   // ★참조
+// 테마: cat.addTheme('mode', 'light')
 ```
-- type: `color` | `spacing` | `dimension` | `sizing` | `borderRadius` | `fontSize` | `opacity` 등.
-- 토큰 적용(재사용): `board.applyToken(token, 'fill')` — 프로퍼티명에 토큰 바인딩.
+
+### 수식과 참조 — 재현성의 핵심
+
+- 참조: `{token.name}` / 수식: `{space.base} * 2`, `{space.base} * 1.5`
+- ⚠️ **연산자 앞뒤에 공백 필수.** `8*8` ❌ / `8 * 8` ✅
+- ⚠️ 참조는 **대소문자 구분**
+- → `space.base` 하나만 바꾸면 전체 리듬이 재계산된다. **숫자 목록 하드코딩 금지.**
+
+### set 순서 = 우선순위 (CSS 캐스케이딩)
+
+동명 토큰이 있으면 **마지막 set이 앞을 덮는다.** 그래서 `core` → `semantic` → `brand` 3층으로 만들면
+브랜드 교체가 마지막 set 하나만 갈아끼우는 일이 된다.
+
+### 전체 TokenType
+
+`color` `dimension` `spacing` `sizing` `rotation` `opacity` `borderRadius` `borderWidth`
+`fontFamilies` `fontSizes` `fontWeights` `letterSpacing` `textCase` `textDecoration`
+`typography`(composite) `shadow`(composite)
+
+### 적용과 증명
+
+```js
+shape.applyToken(token, ['fill']);        // TokenProperty[] — 'all' | 'fill' | 'strokeColor'
+                                          // | 'rowGap','columnGap','paddingLeft'... | 'fontSize' | ...
+token.applyToShapes(shapes, ['fill']);
+
+// ★적용됐는지 증명 (채점 "정의만 하고 미적용 시 감점" 대응)
+shape.tokens                              // => { fill: "color.primary", rowGap: "space.md" }
+penpotUtils.tokenOverview()               // set 이름 → 타입 → 토큰 이름 목록
+```
+
+---
+
+## 🔴 penpotUtils — 검증·교정 유틸 (직접 구현하지 말 것)
+
+```js
+penpotUtils.getPages()                    // [{id, name}]
+penpotUtils.getPageByName(name)           // Page | null   ← find()보다 안전
+penpotUtils.shapeStructure(root, 3)       // {id,name,type,children,layout} — 위계·네이밍 검사
+penpotUtils.findShapes(pred, root)        // root 생략 시 전 Page 순회
+penpotUtils.isContainedIn(shape, box)     // 담기 위반 검출
+penpotUtils.setParentXY(shape, x, y)      // parentX/Y는 읽기전용이라 이걸 써야 함
+```
+
+### ★ `addFlexLayout` — 자식이 있으면 반드시 penpotUtils 쪽을 써라
+
+```js
+penpotUtils.addFlexLayout(container, dir);   // ✅ 기존 자식의 시각 순서를 보존
+// board.addFlexLayout();                    // ❌ 자식이 있으면 순서가 임의로 재배열된다
+```
+
+### ★ `analyzeDescendants` — 검사와 교정을 한 패스로
+
+```js
+// 4의 배수 정렬 검사 + 자동 교정 (8pt 그리드의 하프스텝)
+const fixes = penpotUtils.analyzeDescendants(board, (root, shape) => {
+  if (shape.parentX % 4 !== 0)
+    return () => penpotUtils.setParentXY(shape, Math.round(shape.parentX/4)*4, shape.parentY);
+});
+fixes.forEach(f => f.result());
+
+// 담기 위반 수집
+const bad = penpotUtils.analyzeDescendants(board, (root, s) =>
+  !penpotUtils.isContainedIn(s, root) ? 'outside-bounds' : null);
+```
+
+evaluator는 이걸로 **결정론 채점**을 한다. 미학 판정을 LLM에게 묻기 전에 여기서 걸러라.
+
+---
+
+## 🔴 기타 실측 주의
+
+| 항목 | 주의 |
+|---|---|
+| 색 | **hex 대문자만** (`#FF5533`). 소문자 쓰지 말 것 |
+| 크기 | `width`/`height`는 **읽기 전용** → `resize(w,h)` |
+| fills/strokes | 배열 **내용도 읽기 전용** → 배열을 통째로 교체 |
+| Text | `resize()`가 `growType`을 `fixed`로 바꾼다 → `'auto-width'`/`'auto-height'`로 되돌릴 것. 크기는 `fontSize`로 |
+| 실행 | `use_figma`는 **30초 타임아웃**. 큰 작업은 쪼갤 것 |
+| 시각 확인 | `export_shape` 툴로 이미지를 뽑아 **직접 볼 수 있다** |
+| CSS 추출 | `penpot.generateStyle(shapes,{type:'css',withChildren:true})` — 토큰 밖 매직넘버 탐지용 |
 
 ## 컴포넌트 / 라이브러리
 ```js

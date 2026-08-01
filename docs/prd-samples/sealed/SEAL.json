@@ -1,0 +1,17 @@
+{
+  "sealed_at": "2026-08-01",
+  "files": {
+    "PRD-a-commerce.md": {
+      "sha256": "df9af1cd7db7525019dc6eba88153a863a0016eeb46d5e505c4f4d881c50c3c4",
+      "bytes": 3069
+    },
+    "PRD-b-dashboard.md": {
+      "sha256": "830931f78378fe94c15d3b4b9f2de50bbe76e6e0d98a23f3b1c2372ecb6ed4f2",
+      "bytes": 3398
+    },
+    "sealed/PRD-sealed-longform.md": {
+      "sha256": "5382d1def88facef3888cffdb33884f9e56b69fce980d65073d049e980147b4a",
+      "bytes": 3560
+    }
+  }
+}

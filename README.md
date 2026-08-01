@@ -14,7 +14,7 @@
 |---|---|---|
 | MCP 서버 | **내 노트북** (내가 직접 띄움) | `http://localhost:4401` |
 | Penpot 플러그인 | **내 브라우저** | `http://localhost:4400/manifest.json` |
-| **Penpot 본체** | **VMC 중앙 서버** (원격) | **https://sumin-macmini.tail45121d.ts.net** |
+| **Penpot 본체** | **VMC 중앙 서버** (원격) | **https://penpot.tail45121d.ts.net** |
 
 즉 **`localhost`가 나오는 건 전부 내 컴퓨터 것이 맞습니다.** Penpot만 원격입니다.
 저작 코드는 내 브라우저에서 실행되고, 결과는 중앙 Penpot의 내 파일에 저장됩니다.
@@ -32,10 +32,12 @@
 npx -y @matfia/pigma-mcp
 ```
 
-**2. 중앙 Penpot 접속 → 로그인 → 디자인 파일 생성**
+**2. 중앙 Penpot 접속 → 로그인 → 팀 `5조`의 `작업` 파일 열기**
 
-- https://sumin-macmini.tail45121d.ts.net (계정은 개별 지급)
-- 새 디자인 파일 생성 → 에디터 진입
+- https://penpot.tail45121d.ts.net
+- 아이디 = 신청 시 적은 이메일 / 비밀번호 = **이메일 앞부분 + `123`** (예: `hong@gmail.com` → `hong123`)
+- 새 파일을 만들지 **마세요.** 팀 목록에서 **`5조`** → 파일 **`작업`** 을 엽니다
+- 확인 신호: Page 목록에 `1-daangn`·`2-airbnb`와 **내 이름 Page**가 보인다
 
 **3. 브라우저에서 플러그인 설치·연결**
 
@@ -47,7 +49,19 @@ npx -y @matfia/pigma-mcp
 MCP 등록은 `.mcp.json`에 이미 들어 있어 따로 할 것이 없습니다.
 (하네스를 처음 띄울 때 `penpot` 서버 승인만 눌러주세요.)
 
-막히면 `participant-onboarding.md`의 트러블슈팅을 보세요.
+## 막혔을 때 (실제로 자주 나오는 것들)
+
+| 증상 | 답 |
+|---|---|
+| 플러그인 패널이 비어 있다 | **정상.** iframe 로딩 전입니다. 몇 초 뒤 `CONNECT MCP SERVER`가 뜹니다 |
+| — | ⚠️ **`localhost:4400`을 주소창에 직접 열지 마세요.** 그 탭이 MCP 연결을 **가로챕니다.** 반드시 **Penpot 안에서** 여세요 |
+| — | ⚠️ **`npx`를 두 번 실행하지 마세요.** `EADDRINUSE :4400`으로 죽습니다. 이미 떠 있으면 그 창을 씁니다 |
+| `Missing userToken` | 중앙 통합 플러그인을 깐 것입니다. **`localhost:4400`** 것을 설치하세요 |
+| 연결이 끊긴다 | **브라우저 탭과 npx 창을 둘 다** 켜둬야 합니다 |
+| 버전 경고 | 떠도 동작합니다. 무시하세요 |
+| `corepack: command not found` | `npm i -g pnpm` |
+| 빌드스크립트 차단 | `.npmrc`에 `dangerously-allow-all-builds=true` |
+| `localhost:9001`이 안 열림 | 그 주소가 아닙니다. 공개 URL(`ts.net`)로 접속하세요 |
 
 ## 작업 저장
 
